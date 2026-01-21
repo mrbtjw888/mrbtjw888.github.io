@@ -1,0 +1,171 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+    --font-sans: "Inter", "system-ui", sans-serif;
+    --font-prose: "Noto Sans JP", sans-serif;
+
+    /* Blue Theme Restoration */
+    --color-accent: #1d9bf0;
+    --color-accent-hover: #1a8cd8;
+
+    /* Yellow Theme Restoration */
+/*    --color-accent: #f9e800;
+    --color-accent-hover: #1a8cd8;*/
+
+
+
+    --color-pure-black: #000000;
+    --color-pure-white: #ffffff;
+}
+
+@layer base {
+    :root {
+        --bg-color: #ffffff;
+        --text-color: #1a1a1a;
+        /* Soft black for better reading */
+        --text-secondary: #4b5563;
+        /* Gray-600 */
+        --border-color: #e5e7eb;
+        --nav-hover: #f3f4f6;
+        --card-bg: #ffffff;
+    }
+
+    :root.dark {
+        --bg-color: #0a0a0a;
+        --text-color: #e5e7eb;
+        /* Zinc-200 for soft reading */
+        --text-secondary: #9ca3af;
+        /* Gray-400 */
+        --border-color: #262626;
+        /* Zinc-800 */
+        --nav-hover: #171717;
+        /* Zinc-900 */
+        --card-bg: #121212;
+    }
+
+    html {
+        font-size: 16px;
+        /* 1rem = 16px */
+    }
+
+    body {
+        @apply bg-[var(--bg-color)] text-[var(--text-color)] font-sans transition-colors duration-300;
+        line-height: 1.6;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Refined, smaller headings - Documentation Style */
+    h1 {
+        @apply text-3xl md:text-4xl font-extrabold tracking-tight mb-6;
+    }
+
+    h2 {
+        @apply text-2xl md:text-3xl font-bold tracking-tight mb-4;
+    }
+
+    h3 {
+        @apply text-xl md:text-2xl font-bold tracking-tight mb-3;
+    }
+
+    h4 {
+        @apply text-lg md:text-xl font-bold mb-2;
+    }
+
+    p,
+    li {
+        @apply text-[14px] md:text-base;
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-accent text-white px-5 py-2 rounded-lg font-semibold hover:bg-accent-hover transition-all;
+    }
+
+    .border-nav {
+        border-color: var(--border-color);
+    }
+}
+
+/* Typography Overrides for Documentation Feel */
+.prose {
+    @apply max-w-none;
+    --tw-prose-body: var(--text-color);
+    --tw-prose-headings: var(--text-color);
+    --tw-prose-links: var(--color-accent);
+    --tw-prose-bold: var(--text-color);
+}
+
+.dark .prose {
+    --tw-prose-body: #d1d5db;
+    /* Gray-300 */
+    --tw-prose-headings: #ffffff;
+    --tw-prose-links: var(--color-accent);
+    --tw-prose-bold: #ffffff;
+    --tw-prose-pre-bg: #171717;
+    --tw-prose-code: #ffffff;
+}
+
+/* Remove hover effects from blog images */
+.prose img {
+    @apply rounded-md border shadow-sm grayscale-0 transition-none;
+    border-color: var(--border-color);
+}
+
+.prose img:hover {
+    @apply grayscale-0 scale-100;
+}
+
+.prose {
+  font-family: var(--font-prose);
+}
+
+
+@layer components {
+/* 1. Create the scrollable wrapper behavior */
+  .prose table {
+    display: block;        /* Necessary for overflow to work */
+    overflow-x: auto;      /* Enables horizontal scroll */
+    white-space: nowrap;   /* Prevents text wrapping so the table stays wide */
+    width: 100%;           /* Ensures it takes full width of the container */
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 0px solid var(--border-color);
+    
+    /* Optional: Custom scrollbar styling to make it look thinner */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+  }
+
+  /* 2. Your existing cell styling */
+  .prose table th,
+  .prose table td {
+    padding: 0.4rem 0.8rem !important;
+    border-right: 0.5px solid var(--border-color);
+    border-bottom: 0.5px solid var(--border-color);
+    border-left: 0.5px solid var(--border-color);
+    border-top: 0.5px solid var(--border-color);
+    vertical-align: middle;
+  }
+
+
+
+  /* HEADER */
+  .prose table thead th {
+    background-color: var(--nav-hover);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  /* BODY */
+  .prose table tbody td {
+    background-color: var(--card-bg);
+  }
+
+  /* Dark mode body cells */
+  :root.dark .prose table tbody td {
+    background-color: #0f0f0f;
+  }
+}

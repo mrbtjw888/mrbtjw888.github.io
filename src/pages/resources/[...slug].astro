@@ -1,0 +1,49 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+
+export async function getStaticPaths() {
+	const resources = await getCollection('resources');
+	return resources.map((res) => ({
+		params: { slug: res.slug },
+		props: res,
+	}));
+}
+type Props = CollectionEntry<'resources'>;
+
+const res = Astro.props;
+const { Content } = await res.render();
+---
+
+<BaseLayout title={`${res.data.title} | Resources`}>
+	<Header slot="header" />
+	
+	<article class="py-8 max-w-3xl">
+		<header class="flex flex-col gap-6 mb-12 border-b border-nav pb-8">
+			<div class="flex items-center gap-4 text-[14px] font-bold text-[var(--text-secondary)]">
+				<span class="px-3 py-1 bg-nav rounded border border-nav uppercase tracking-wider text-sm">{res.data.category}</span>
+				<time datetime={res.data.pubDate.toISOString()}>
+					{res.data.pubDate.toLocaleDateString('en-us', {
+						year: 'numeric',
+						month: 'long',
+						day: 'numeric',
+					})}
+				</time>
+			</div>
+			<h1 class="text-2xl md:text-4xl font-extrabold tracking-tight leading-tight">
+				{res.data.title}
+			</h1>
+			<p class="text-lg md:text-lg text-[var(--text-secondary)] font-medium leading-relaxed italic border-l-3 border-accent pl-6">
+				{res.data.description}
+			</p>
+		</header>
+
+		<div class="prose prose-zinc dark:prose-invert max-w-none">
+			<Content />
+		</div>
+	</article>
+
+	<Footer slot="footer" />
+</BaseLayout>

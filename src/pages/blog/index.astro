@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BaseLayout title="Journal">
+	<Header slot="header" />
+	
+	<div class="py-10 flex flex-col gap-10">
+		<header class="flex flex-col gap-3 border-b border-nav pb-8">
+			<h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Journal</h1>
+			<p class="text-base md:text-lg text-[var(--text-secondary)] font-medium">Random content</p>
+		</header>
+
+		<section class="flex flex-col gap-10">
+			{posts.map((post) => (
+				<article class="group flex flex-col md:flex-row gap-6 items-start">
+					{post.data.heroImage && (
+						<div class="w-full md:w-1/4 aspect-video overflow-hidden rounded-xl border border-nav bg-zinc-100">
+							<img 
+								src={post.data.heroImage} 
+								alt="" 
+								class="w-full h-full object-cover"
+							/>
+						</div>
+					)}
+					<div class="flex-grow flex flex-col gap-2">
+						<time datetime={post.data.pubDate.toISOString()} class="text-sm font-bold text-[var(--text-secondary)]">
+							{post.data.pubDate.toLocaleDateString('en-us', {
+								year: 'numeric',
+								month: 'short',
+								day: 'numeric',
+							})}
+						</time>
+						<h2 class="text-xl md:text-2xl font-bold transition-colors group-hover:text-accent">
+							<a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+						</h2>
+						<p class="text-[14px] md:text-base text-[var(--text-secondary)] font-medium line-clamp-2 leading-snug">
+							{post.data.description}
+						</p>
+					</div>
+				</article>
+			))}
+		</section>
+	</div>
+
+	<Footer slot="footer" />
+</BaseLayout>

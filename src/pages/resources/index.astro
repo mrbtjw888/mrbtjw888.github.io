@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const resources = (await getCollection('resources')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BaseLayout title="Resources">
+	<Header slot="header" />
+	
+	<div class="py-10 flex flex-col gap-10">
+		<header class="flex flex-col gap-3 border-b border-nav pb-8">
+			<h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Resources</h1>
+			<p class="text-base md:text-lg text-[var(--text-secondary)] font-medium">Curated tools, frameworks, and reference materials.</p>
+		</header>
+
+		<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			{resources.map((res) => (
+				<article class="group relative flex flex-col gap-4 p-6 rounded-2xl bg-[var(--card-bg)] border border-nav hover:border-accent transition-all">
+					<div class="flex justify-between items-center text-sm font-bold text-[var(--text-secondary)]">
+						<span class="px-2 py-0.5 bg-nav rounded border border-nav uppercase tracking-wider text-[12px]">{res.data.category}</span>
+						<time datetime={res.data.pubDate.toISOString()}>
+							{res.data.pubDate.toLocaleDateString('en-us', { year: 'numeric', month: 'short' })}
+						</time>
+					</div>
+					<h2 class="text-xl md:text-2xl font-bold transition-colors group-hover:text-accent">
+						<a href={`/resources/${res.slug}/`}>{res.data.title}</a>
+					</h2>
+					<p class="text-[14px] md:text-base text-[var(--text-secondary)] font-medium line-clamp-2 leading-relaxed">
+						{res.data.description}
+					</p>
+					<a href={`/resources/${res.slug}/`} class="mt-auto text-accent font-bold text-sm flex items-center gap-1">
+						View Details <span>&rarr;</span>
+					</a>
+				</article>
+			))}
+		</section>
+	</div>
+
+	<Footer slot="footer" />
+</BaseLayout>

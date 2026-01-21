@@ -1,0 +1,175 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import { getCollection } from 'astro:content';
+
+const navItems = [
+  { href: '/', label: 'Home' },
+  { href: '/portfolio', label: 'Portfolio' },
+  { href: '/blog', label: 'Blog' },
+];
+
+const resources = await getCollection('resources');
+---
+<script is:inline>
+  // This runs instantly before the HTML is fully parsed to prevent flickering
+  if (localStorage.getItem('resources-expanded') === 'true') {
+    document.documentElement.classList.add('resources-open');
+  }
+</script>
+
+<!-- Desktop Sidebar -->
+<aside class="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 border-r border-nav bg-[var(--bg-color)] z-50 p-6">
+  <div class="mb-8">
+    <a href="/" class="text-xl font-bold tracking-tight hover:text-accent transition-colors">
+      jw888
+    </a>
+  </div>
+
+  <nav class="flex-grow">
+    <ul class="flex flex-col gap-1">
+      {navItems.map(item => (
+        <li>
+          <a
+            href={item.href}
+            class="block px-3 py-2 rounded-lg hover:bg-[var(--nav-hover)] transition-colors font-semibold text-sm"
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+      
+      <!-- Resources Accordion -->
+      <li class="relative">
+        <div class="flex items-center group">
+          <a href="/resources" class="flex-grow px-3 py-2 rounded-l-lg hover:bg-[var(--nav-hover)] transition-colors font-semibold text-sm">
+            Resources
+          </a>
+          <button 
+            id="resources-toggle" 
+            class="px-2 py-2 rounded-r-lg hover:bg-[var(--nav-hover)] transition-colors"
+            aria-label="Toggle resources list"
+          >
+            <svg id="resources-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Accordion Content -->
+        <div id="resources-accordion" class="hidden border-l-2 border-nav ml-6 mt-1 flex flex-col gap-0.5">
+           {resources.map(res => (
+             <a href={`/resources/${res.slug}`} class="block px-3 py-1.5 rounded-md hover:bg-[var(--nav-hover)] text-sm font-medium text-[var(--text-secondary)] hover:text-accent transition-all">
+               {res.data.title}
+             </a>
+           ))}
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="mt-auto pt-4 flex items-center justify-between border-t border-nav">
+    <ThemeToggle />
+    <span class="text-sm text-zinc-500 font-medium">v3.1.0</span>
+  </div>
+</aside>
+
+<!-- Mobile Top Bar -->
+<header class="md:hidden flex items-center justify-between p-4 border-b border-nav bg-[var(--bg-color)] sticky top-0 z-50 w-full">
+  <a href="/" class="text-lg font-bold tracking-tight">jw888</a>
+  <div class="flex items-center gap-2">
+    <ThemeToggle />
+    <button id="mobile-menu-open" class="p-2" aria-label="Open menu">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile Drawer -->
+<div id="mobile-drawer" class="fixed inset-0 z-[100] invisible">
+  <div 
+    id="drawer-overlay" 
+    class="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 transition-opacity duration-300"
+  ></div>
+
+  <div 
+    id="drawer-panel" 
+    class="absolute right-0 top-0 w-[280px] h-full bg-[var(--bg-color)] shadow-2xl p-6 flex flex-col translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto"
+  >
+    <div class="flex justify-end mb-8">
+       <button id="mobile-menu-close" class="p-2 hover:text-accent" aria-label="Close menu">
+         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+         </svg>
+       </button>
+    </div>
+
+    <nav>
+      <ul class="flex flex-col gap-4 text-xl font-bold">
+        {navItems.map(item => (
+          <li><a href={item.href} class="hover:text-accent block py-1">{item.label}</a></li>
+        ))}
+        <li>
+          <span class="block py-1 text-zinc-500 text-sm uppercase tracking-widest mb-2">Resources</span>
+          <ul class="ml-4 flex flex-col gap-3 text-base font-medium text-[var(--text-secondary)] border-l border-nav pl-4">
+             {resources.map(res => (
+               <li><a href={`/resources/${res.slug}`} class="hover:text-accent block">{res.data.title}</a></li>
+             ))}
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<script>
+  function setupNav() {
+    // --- 1. Resources Accordion Persistence ---
+    const accBtn = document.getElementById('resources-toggle');
+    const accordion = document.getElementById('resources-accordion');
+    const accIcon = document.getElementById('resources-icon');
+
+    const isExpanded = localStorage.getItem('resources-expanded') === 'true';
+    if (isExpanded && accordion) {
+      accordion.classList.remove('hidden');
+      accIcon?.classList.add('rotate-180');
+    }
+
+    accBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const nowHidden = accordion?.classList.toggle('hidden');
+      accIcon?.classList.toggle('rotate-180');
+      localStorage.setItem('resources-expanded', nowHidden ? 'false' : 'true');
+    });
+
+    // --- 2. Mobile Drawer Logic ---
+    const drawer = document.getElementById('mobile-drawer');
+    const overlay = document.getElementById('drawer-overlay');
+    const panel = document.getElementById('drawer-panel');
+    const openBtn = document.getElementById('mobile-menu-open');
+    const closeBtn = document.getElementById('mobile-menu-close');
+
+    const toggleDrawer = (isOpen) => {
+      if (isOpen) {
+        drawer?.classList.remove('invisible');
+        overlay?.classList.add('opacity-100');
+        panel?.classList.remove('translate-x-full');
+        document.body.style.overflow = 'hidden';
+      } else {
+        overlay?.classList.remove('opacity-100');
+        panel?.classList.add('translate-x-full');
+        document.body.style.overflow = '';
+        setTimeout(() => drawer?.classList.add('invisible'), 300);
+      }
+    };
+
+    openBtn?.addEventListener('click', () => toggleDrawer(true));
+    closeBtn?.addEventListener('click', () => toggleDrawer(false));
+    overlay?.addEventListener('click', () => toggleDrawer(false));
+  }
+
+  // Initialize on load and on every page change
+  setupNav();
+  document.addEventListener('astro:page-load', setupNav);
+</script>
